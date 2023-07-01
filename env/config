@@ -1,0 +1,6 @@
+[ports]
+port=":50001"
+
+[importer]
+serverPort=":50001"
+filePath="./internal/importer/json/ports.json"

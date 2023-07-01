@@ -34,9 +34,8 @@ func NewService(logger *logrus.Logger, repository Repository) Service {
 }
 
 func (s Service) Store(ctx context.Context, port *Port) error {
-	s.logger.Info("service Store called")
 	if port == nil {
-		return fmt.Errorf("nil port given")
+		return fmt.Errorf("port is nil")
 	}
 
 	if port.PortID == "" || port.Name == "" {
@@ -46,6 +45,8 @@ func (s Service) Store(ctx context.Context, port *Port) error {
 	if err := s.repository.Store(ctx, port); err != nil {
 		return fmt.Errorf("error storing port err: %w", err)
 	}
+
+	s.logger.Infof("successfully storing port: %+v", port)
 
 	return nil
 }

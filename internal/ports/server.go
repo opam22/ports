@@ -3,46 +3,51 @@ package ports
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/opam22/ports/internal/ports/adapter"
 	"github.com/opam22/ports/internal/ports/domain/ports"
 	gRPC "github.com/opam22/ports/internal/ports/grpc"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
-)
-
-var (
-	port = ":50001"
 )
 
 type Server struct {
 	logger *logrus.Logger
 	gRPC.UnimplementedPortServiceServer
 	service ports.Service
+	config  *viper.Viper
+	port    string
 }
 
-func NewServer(logger *logrus.Logger) *Server {
+func NewServer(logger *logrus.Logger, config *viper.Viper) *Server {
 	return &Server{
 		logger: logger,
 		service: ports.NewService(
 			logger,
 			adapter.NewDB(),
 		),
+		config: config,
+		port:   config.GetString("ports.port"),
 	}
 }
 
 func (s *Server) Serve(ctx context.Context) error {
 	grpcServer := grpc.NewServer()
 	gRPC.RegisterPortServiceServer(grpcServer, s)
-	listener, err := net.Listen("tcp", port)
+	listener, err := net.Listen("tcp", s.port)
 	if err != nil {
 		return fmt.Errorf("server fail to listening: %w", err)
 	}
 
-	s.logger.Info("server running on ", port)
+	s.logger.Info("server running on", s.port)
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		return fmt.Errorf("server failed to serve: %w", err)
@@ -107,4 +112,25 @@ func toPortDomain(p *gRPC.Port) *ports.Port {
 		Unlocs:      p.Unlocs,
 		Code:        p.Code,
 	}
+}
+
+func waitForShutdown(ctx context.Context, server *grpc.Server) {
+	// Create a channel to receive OS signals
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
+
+	// Wait for OS signals
+	select {
+	case <-ctx.Done():
+		// Cancellation signal received, initiate graceful shutdown
+		log.Println("Initiating graceful shutdown...")
+		server.GracefulStop()
+	case sig := <-signalCh:
+		// OS signal received, print the signal and initiate graceful shutdown
+		log.Printf("Received signal: %v. Initiating graceful shutdown...", sig)
+		server.GracefulStop()
+	}
+
+	// Wait for the server to shut down
+	log.Println("Server gracefully stopped.")
 }

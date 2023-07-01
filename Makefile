@@ -7,3 +7,6 @@ run-ports:
 
 run-importer:
 	@go run cmd/importer/main.go
+
+test:
+	@go test ./... -v
