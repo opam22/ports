@@ -12,8 +12,13 @@ var (
 	logger *logrus.Logger
 )
 
+func init() {
+	logger = logrus.New()
+	logger.Formatter = &logrus.JSONFormatter{PrettyPrint: true}
+}
+
 func main() {
-	importer, err := importer.NewService()
+	importer, err := importer.NewService(logger)
 	if err != nil {
 		log.Println(err)
 	}

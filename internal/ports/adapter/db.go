@@ -2,7 +2,6 @@ package adapter
 
 import (
 	"context"
-	"log"
 	"sync"
 
 	"github.com/opam22/ports/internal/ports/domain/ports"
@@ -18,7 +17,6 @@ func NewDB() *DB {
 
 func (db *DB) Store(ctx context.Context, port *ports.Port) error {
 	db.ports.Store(port.PortID, port)
-	log.Println("stored", port)
 	return nil
 }
 

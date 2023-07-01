@@ -3,6 +3,8 @@ package ports
 import (
 	"context"
 	"fmt"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Repository interface {
@@ -20,16 +22,19 @@ type RepositoryReader interface {
 }
 
 type Service struct {
+	logger     *logrus.Logger
 	repository Repository
 }
 
-func NewService(repository Repository) Service {
+func NewService(logger *logrus.Logger, repository Repository) Service {
 	return Service{
+		logger:     logger,
 		repository: repository,
 	}
 }
 
 func (s Service) Store(ctx context.Context, port *Port) error {
+	s.logger.Info("service Store called")
 	if port == nil {
 		return fmt.Errorf("nil port given")
 	}
@@ -46,6 +51,8 @@ func (s Service) Store(ctx context.Context, port *Port) error {
 }
 
 func (s Service) Get(ctx context.Context) ([]Port, error) {
+	s.logger.Info("service Get called ")
+
 	ports, err := s.repository.Get(ctx)
 	return ports, err
 }
