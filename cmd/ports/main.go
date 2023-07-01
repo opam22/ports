@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/opam22/ports/internal/ports"
 	"github.com/sirupsen/logrus"
@@ -39,7 +42,16 @@ func init() {
 func main() {
 	server := ports.NewServer(logger, config)
 
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
+
+	go func(cancel context.CancelFunc) {
+		s := <-signalCh
+		logger.Info("gracefully shutdown ports: signal: ", s)
+		cancel()
+	}(cancel)
+
 	if err := server.Serve(ctx); err != nil {
 		log.Println("fatal to serve the server", err)
 	}

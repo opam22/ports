@@ -48,6 +48,15 @@ func NewService(logger *logrus.Logger, config *viper.Viper) (*Service, error) {
 }
 
 func (s *Service) Run(ctx context.Context) (err error) {
+	// graceful shutdown
+	go func() {
+		<-ctx.Done()
+		if err := s.portsClient.Close(); err != nil {
+			s.logger.Error("error closing client connection: %w", err)
+		}
+		return
+	}()
+
 	file, err := os.Open(s.filePath)
 	if err != nil {
 		s.logger.Error("error opening file: %w", err)

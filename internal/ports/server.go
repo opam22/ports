@@ -3,11 +3,7 @@ package ports
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/opam22/ports/internal/ports/adapter"
 	"github.com/opam22/ports/internal/ports/domain/ports"
@@ -42,6 +38,13 @@ func NewServer(logger *logrus.Logger, config *viper.Viper) *Server {
 func (s *Server) Serve(ctx context.Context) error {
 	grpcServer := grpc.NewServer()
 	gRPC.RegisterPortServiceServer(grpcServer, s)
+
+	// graceful shutdown
+	go func() {
+		<-ctx.Done()
+		grpcServer.GracefulStop()
+	}()
+
 	listener, err := net.Listen("tcp", s.port)
 	if err != nil {
 		return fmt.Errorf("server fail to listening: %w", err)
@@ -112,25 +115,4 @@ func toPortDomain(p *gRPC.Port) *ports.Port {
 		Unlocs:      p.Unlocs,
 		Code:        p.Code,
 	}
-}
-
-func waitForShutdown(ctx context.Context, server *grpc.Server) {
-	// Create a channel to receive OS signals
-	signalCh := make(chan os.Signal, 1)
-	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
-
-	// Wait for OS signals
-	select {
-	case <-ctx.Done():
-		// Cancellation signal received, initiate graceful shutdown
-		log.Println("Initiating graceful shutdown...")
-		server.GracefulStop()
-	case sig := <-signalCh:
-		// OS signal received, print the signal and initiate graceful shutdown
-		log.Printf("Received signal: %v. Initiating graceful shutdown...", sig)
-		server.GracefulStop()
-	}
-
-	// Wait for the server to shut down
-	log.Println("Server gracefully stopped.")
 }
