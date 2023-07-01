@@ -16,3 +16,6 @@ docker-run:
 
 docker-build:
 	@docker-compose build
+
+check:
+	@go fmt ./... && go vet ./...

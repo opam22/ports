@@ -4,6 +4,7 @@ import (
 	gRPC "github.com/opam22/ports/internal/ports/grpc"
 )
 
+// domain entity
 type Port struct {
 	Name        string    `json:"name"`
 	City        string    `json:"city"`
@@ -17,6 +18,7 @@ type Port struct {
 	Code        string    `json:"code"`
 }
 
+// toProtoPort will transform port object to grpc port protobuf message
 func toProtoPort(key string, p Port) *gRPC.Port {
 	return &gRPC.Port{
 		PortId:      key,

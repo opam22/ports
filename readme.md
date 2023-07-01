@@ -26,6 +26,9 @@ Build docker image:
 # Test
 To run the tests, simple run `make test`
 
+# Go fmt and vet
+To run go fmt and vet run `make check`
+
 # Generate new protobuf
 To generate new protobuf, run `make generate`
 

@@ -1,5 +1,6 @@
 package ports
 
+// domain entity
 type Port struct {
 	PortID      string    `json:"port_id"`
 	Name        string    `json:"name"`

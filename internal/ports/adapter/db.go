@@ -7,6 +7,8 @@ import (
 	"github.com/opam22/ports/internal/ports/domain/ports"
 )
 
+// DB struct using sync.Map to store the ports data using map
+// it is conccurent safe so no need to use Mu.Lock Mu.Unlock
 type DB struct {
 	ports sync.Map
 }
@@ -15,11 +17,13 @@ func NewDB() *DB {
 	return &DB{}
 }
 
+// storing data to db
 func (db *DB) Store(ctx context.Context, port *ports.Port) error {
 	db.ports.Store(port.PortID, port)
 	return nil
 }
 
+// get data from db
 func (db *DB) Get(ctx context.Context) ([]ports.Port, error) {
 	var list []ports.Port
 
@@ -33,6 +37,7 @@ func (db *DB) Get(ctx context.Context) ([]ports.Port, error) {
 	return list, nil
 }
 
+// find by id
 func (db *DB) FindByID(ctx context.Context, portID string) *ports.Port {
 	var (
 		foundPort *ports.Port

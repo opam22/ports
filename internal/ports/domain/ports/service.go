@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// define contract for repository
 type Repository interface {
 	RepositoryWriter
 	RepositoryReader
@@ -21,11 +22,13 @@ type RepositoryReader interface {
 	FindByID(context.Context, string) *Port
 }
 
+// port service struct
 type Service struct {
 	logger     *logrus.Logger
 	repository Repository
 }
 
+// initialize port service
 func NewService(logger *logrus.Logger, repository Repository) Service {
 	return Service{
 		logger:     logger,
@@ -33,6 +36,7 @@ func NewService(logger *logrus.Logger, repository Repository) Service {
 	}
 }
 
+// Store method will store port object to db
 func (s Service) Store(ctx context.Context, port *Port) error {
 	if port == nil {
 		return fmt.Errorf("port is nil")
@@ -51,6 +55,7 @@ func (s Service) Store(ctx context.Context, port *Port) error {
 	return nil
 }
 
+// Get method will get all the data from db and returns it
 func (s Service) Get(ctx context.Context) ([]Port, error) {
 	s.logger.Info("service Get called ")
 

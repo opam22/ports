@@ -23,6 +23,7 @@ type Server struct {
 	port    string
 }
 
+// initialize new ports server
 func NewServer(logger *logrus.Logger, config *viper.Viper) *Server {
 	return &Server{
 		logger: logger,
@@ -78,6 +79,7 @@ func (s *Server) Get(ctx context.Context, _ *emptypb.Empty) (*gRPC.GetResponse, 
 	}, nil
 }
 
+// toProtoPort will transform port object to grpc port protobuf message
 func toProtoPort(ports []ports.Port) []*gRPC.Port {
 	proto := []*gRPC.Port{}
 	for _, p := range ports {
@@ -101,6 +103,7 @@ func toProtoPort(ports []ports.Port) []*gRPC.Port {
 	return proto
 }
 
+// toProtoPort will transform grpc port protobuf message to *ports.Port
 func toPortDomain(p *gRPC.Port) *ports.Port {
 	return &ports.Port{
 		PortID:      p.PortId,

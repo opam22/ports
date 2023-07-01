@@ -13,6 +13,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+// PortsClient will invoke ports grpc server services
 type Client struct {
 	logger *logrus.Logger
 	client gRPC.PortServiceClient
@@ -23,7 +24,7 @@ type Client struct {
 func NewClient(logger *logrus.Logger, config *viper.Viper) (*Client, error) {
 	portHost := config.GetString("importer.serverPort")
 	if os.Getenv("ports_host") != "" {
-		// from docker
+		// use host from docker if any
 		portHost = os.Getenv("ports_host")
 
 	}

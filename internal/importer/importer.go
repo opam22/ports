@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// define PortsClient contracts
 type PortsClient interface {
 	PortsClientWriter
 	PortsClientReader
@@ -27,6 +28,7 @@ type PortsClientReader interface {
 	Get(ctx context.Context) ([]*gRPC.Port, error)
 }
 
+// Importer service
 type Service struct {
 	logger      *logrus.Logger
 	portsClient PortsClient
@@ -34,6 +36,7 @@ type Service struct {
 	filePath    string
 }
 
+// initialize Importer service
 func NewService(logger *logrus.Logger, config *viper.Viper) (*Service, error) {
 	client, err := portsclient.NewClient(logger, config)
 	if err != nil {
@@ -47,6 +50,9 @@ func NewService(logger *logrus.Logger, config *viper.Viper) (*Service, error) {
 	}, nil
 }
 
+// method Run will read json file from filePath
+// and will decode it one by one
+// then sending it to ports service
 func (s *Service) Run(ctx context.Context) (err error) {
 	// graceful shutdown
 	go func() {
@@ -64,6 +70,7 @@ func (s *Service) Run(ctx context.Context) (err error) {
 	}
 	defer file.Close()
 
+	// decode the beginning of the json
 	decoder := json.NewDecoder(file)
 	_, err = decoder.Token()
 	if err != nil {
@@ -101,12 +108,14 @@ func (s *Service) Run(ctx context.Context) (err error) {
 		}
 	}
 
+	// decode the last part  of the json
 	_, err = decoder.Token()
 	if err != nil {
 		s.logger.Error("error decoding json: %w", err)
 		return
 	}
 
+	// closing ports client connection
 	if err := s.portsClient.Close(); err != nil {
 		s.logger.Error("error closing client connection: %w", err)
 		return err
