@@ -10,3 +10,9 @@ run-importer:
 
 test:
 	@go test ./... -v
+
+docker-run:
+	@docker-compose up
+
+docker-build:
+	@docker-compose build

@@ -3,6 +3,7 @@ package portsclient
 import (
 	"context"
 	"fmt"
+	"os"
 
 	gRPC "github.com/opam22/ports/internal/ports/grpc"
 	"github.com/sirupsen/logrus"
@@ -20,7 +21,13 @@ type Client struct {
 }
 
 func NewClient(logger *logrus.Logger, config *viper.Viper) (*Client, error) {
-	connection, err := grpc.Dial(config.GetString("importer.serverPort"), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	portHost := config.GetString("importer.serverPort")
+	if os.Getenv("ports_host") != "" {
+		// from docker
+		portHost = os.Getenv("ports_host")
+
+	}
+	connection, err := grpc.Dial(portHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return &Client{}, fmt.Errorf("error tryng to dial on %v: %w", config.GetString("importer.serverPort"), err)
 	}

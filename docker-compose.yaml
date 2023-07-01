@@ -1,0 +1,22 @@
+version: '3'
+services:
+  ports:
+    build:
+      context: .
+      dockerfile: PortsDockerfile
+    ports:
+      - "50001:50001"
+    networks:
+      - my_network
+  importer:
+    build:
+      context: .
+      dockerfile: ImporterDockerfile
+    depends_on:
+      - ports
+    networks:
+      - my_network
+    environment:
+      ports_host: ports:50001
+networks:
+  my_network:
