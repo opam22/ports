@@ -48,11 +48,11 @@ func main() {
 
 	go func(cancel context.CancelFunc) {
 		s := <-signalCh
-		logger.Info("gracefully shutdown ports: signal: ", s)
+		logger.Info("gracefully shutdown ports service: signal: ", s)
 		cancel()
 	}(cancel)
 
 	if err := server.Serve(ctx); err != nil {
-		log.Println("fatal to serve the server", err)
+		logger.Fatal("fatal to serve the server", err)
 	}
 }

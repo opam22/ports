@@ -58,9 +58,9 @@ func main() {
 
 	err = importer.Run(ctx)
 	if err != nil {
-		log.Println(err)
+		logger.Fatal(err)
 	}
 
-	log.Println("importer done")
-	log.Println("importer shutdown")
+	logger.Info("importer done")
+	logger.Info("importer shutdown")
 }

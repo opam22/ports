@@ -11,11 +11,11 @@ Importer service will read the json file (ports.json) and will decode it one by 
 Ports service will process port data that received from Importer service and will store it in database (in-memory)
 
 ## How to run
-Create your own config, copy env/config.sample to env/config
+Create your own config, copy `env/config.sample` to `env/config`
 
 Run without docker:
-Start the server with `make run-ports`
-Then run the importer `make run-importer`
+1. Start the server first with `make run-ports` 
+2. Then run the importer `make run-importer`
 
 Run with docker:
 `make docker-run`
